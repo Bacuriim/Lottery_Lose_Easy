@@ -15,6 +15,7 @@ CREATE TABLE Funcionario (
     id uuid PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     numero_identificacao VARCHAR(20) UNIQUE NOT NULL,
+    salario DECIMAL NOT NULL,
     cpf VARCHAR(14) UNIQUE NOT NULL,
     sexo CHAR(1),
     idade INT,

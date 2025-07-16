@@ -17,6 +17,6 @@ func main() {
 		Conta:    "1234567890",
 	}
 
-	models.Salvar(cliente)
+	cliente.Salvar(cliente)
 	controllers.Init()
 }

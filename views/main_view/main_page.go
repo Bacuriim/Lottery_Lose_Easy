@@ -2,6 +2,8 @@ package main_view
 
 import (
 	"fmt"
+	"fyne.io/fyne/v2/canvas"
+	"image/color"
 	"lottery-lose-easy/database"
 	"lottery-lose-easy/views/table_views"
 
@@ -24,7 +26,7 @@ func Init() fyne.App {
 
 func GetMainScreen() fyne.Window {
 	if mainPage == nil {
-		mainPage = myApp.NewWindow("Loteria Perca Fácil")
+		mainPage = myApp.NewWindow("Lotérica Perca Fácil")
 		return mainPage
 	}
 	return mainPage
@@ -48,29 +50,43 @@ func MainPage() {
 	// Define o tamanho da janela
 	mainPage.Resize(fyne.NewSize(800, 600))
 
+	// Label do trabalho
+	txLottery := canvas.NewText("Lotérica Perca Fácil", color.RGBA{R: 173, G: 216, B: 240, A: 255})
+	txLottery.Alignment = fyne.TextAlignCenter
+	txLottery.TextSize = 30
+	txLottery.Resize(fyne.NewSize(800, 300))
+
+	txParticipants := canvas.NewText("Conrado Einstein - Hiel Saraiva - João Marcelo Pimenta", color.RGBA{R: 255, G: 255, B: 255, A: 255})
+	txParticipants.Alignment = fyne.TextAlignCenter
+	txParticipants.Resize(fyne.NewSize(800, 200))
+
 	// Botões para navegação
 	btClients := widget.NewButton("Clientes", func() {
 		mainPage.Hide()
 		table_views.ClientePage(myApp, mainPage)
 	})
+	btClients.Resize(fyne.NewSize(400, 100))
 
 	btFuncionarios := widget.NewButton("Funcionários", func() {
 		mainPage.Hide()
 		table_views.FuncionarioPage(myApp, mainPage)
 	})
+	btFuncionarios.Resize(fyne.NewSize(400, 100))
 
 	btServicos := widget.NewButton("Serviços", func() {
 		mainPage.Hide()
 		table_views.ServicoPage(myApp, mainPage)
 	})
+	btServicos.Resize(fyne.NewSize(400, 100))
 
 	btAtendimentos := widget.NewButton("Atendimentos", func() {
 		mainPage.Hide()
 		table_views.AtendimentoPage(myApp, mainPage)
 	})
+	btAtendimentos.Resize(fyne.NewSize(400, 100))
 
 	// Layout da barra superior
-	barraSuperior := container.NewHBox(btClients, btFuncionarios, btServicos, btAtendimentos)
+	barraSuperior := container.NewVBox(txLottery, txParticipants, btClients, btFuncionarios, btServicos, btAtendimentos)
 
 	// Layout principal
 	mainPage.SetContent(
@@ -79,7 +95,7 @@ func MainPage() {
 			nil,           // Rodapé: Botão de voltar
 			nil,           // Esquerda: vazio
 			nil,           // Direita: vazio
-			nil,           // Centro: Árvore
+			nil,
 		),
 	)
 

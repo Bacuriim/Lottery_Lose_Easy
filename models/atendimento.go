@@ -42,7 +42,7 @@ func (*Atendimento) Remover(a Atendimento) string {
 	if err != nil {
 		return "Erro: " + err.Error()
 	}
-	return "Atendimento removido com sucesso!"
+	return "Atendimento removido!"
 }
 
 func (*Atendimento) Alterar(rowName string, rowValue interface{}, column string, condition interface{}) string {
@@ -53,7 +53,7 @@ func (*Atendimento) Alterar(rowName string, rowValue interface{}, column string,
 	if err != nil {
 		return "Erro: " + err.Error()
 	}
-	return "Atendimento alterado com sucesso!"
+	return "Atendimento alterado!"
 }
 
 func (*Atendimento) Pesquisar(searchParameter string, value binding.String, isNumber bool) (*Atendimento, string) {

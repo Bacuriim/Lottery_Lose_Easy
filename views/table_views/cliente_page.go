@@ -37,6 +37,10 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Adicionar Cliente"),
 		entryName, entryCpf, entryGender, entryAge, entryAddress, entryAccount,
 		widget.NewButton("Criar cliente", func() {
+			if utils.AtLeastOneEntryNil(entryName, entryCpf, entryGender, entryAge, entryAddress, entryAccount) {
+				resultLabel.SetText("Preencha todos os campos!")
+				return
+			}
 			idade, _ := strconv.Atoi(entryAge.Text)
 			cliente := models.Cliente{
 				Id:       uuid.New(),
@@ -49,6 +53,7 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 			}
 			msg := cliente.Salvar(cliente)
 			resultLabel.SetText(msg)
+			utils.LimparCampos(entryName, entryCpf, entryGender, entryAge, entryAddress, entryAccount)
 		}),
 		resultLabel,
 	)
@@ -88,6 +93,10 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Buscar Cliente por CPF"),
 		searchCpf,
 		widget.NewButton("Buscar", func() {
+			if utils.AtLeastOneEntryNil(searchCpf) {
+				resultLabel.SetText("Preencha todos os campos!")
+				return
+			}
 			val := binding.NewString()
 			val.Set(searchCpf.Text)
 			c, msg := new(models.Cliente).Pesquisar("cpf", val, false)
@@ -96,6 +105,7 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 			} else {
 				searchResult.SetText(msg)
 			}
+			utils.LimparCampos(entryName, entryCpf, entryGender, entryAge, entryAddress, entryAccount)
 		}),
 		searchResult,
 	)
@@ -107,6 +117,10 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 		updateCpf,
 		entryName, entryGender, entryAge, entryAddress, entryAccount,
 		widget.NewButton("Atualizar", func() {
+			if utils.AtLeastOneEntryNil(updateCpf) {
+				resultLabel.SetText("Preencha o cpf a ser alterado!")
+				return
+			}
 			msg := ""
 			if entryName.Text != "" {
 				msg = new(models.Cliente).Alterar("nome", entryName.Text, "cpf", updateCpf.Text)
@@ -125,6 +139,7 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 				msg = new(models.Cliente).Alterar("conta", entryAccount.Text, "cpf", updateCpf.Text)
 			}
 			resultLabel.SetText(msg)
+			utils.LimparCampos(entryName, entryCpf, entryGender, entryAge, entryAddress, entryAccount)
 		}),
 		resultLabel,
 	)
@@ -135,6 +150,10 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Remover Cliente"),
 		removeCpf,
 		widget.NewButton("Remover", func() {
+			if utils.AtLeastOneEntryNil(removeCpf) {
+				resultLabel.SetText("Preencha o cpf do usuário a ser removido")
+				return
+			}
 			val := binding.NewString()
 			val.Set(removeCpf.Text)
 			c, _ := new(models.Cliente).Pesquisar("cpf", val, false)
@@ -144,6 +163,7 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 			} else {
 				resultLabel.SetText("Cliente não encontrado para remover.")
 			}
+			utils.LimparCampos(entryName, entryCpf, entryGender, entryAge, entryAddress, entryAccount)
 		}),
 		resultLabel,
 	)

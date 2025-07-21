@@ -36,6 +36,10 @@ func FuncionarioPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Adicionar Funcionário"),
 		entryNome, entryIdent, entrySalario, entryCpf, entrySexo, entryIdade, entryHorario,
 		widget.NewButton("Criar funcionário", func() {
+			if utils.AtLeastOneEntryNil(entryNome, entryIdent, entrySalario, entryCpf, entrySexo, entryIdade, entryHorario) {
+				resultLabel.SetText("Preencha todos os campos!")
+				return
+			}
 			idade, _ := strconv.Atoi(entryIdade.Text)
 			salario, _ := strconv.ParseFloat(entrySalario.Text, 64)
 			funcionario := models.Funcionario{
@@ -50,6 +54,7 @@ func FuncionarioPage(myApp fyne.App, mainPage fyne.Window) {
 			}
 			msg := funcionario.Salvar(funcionario)
 			resultLabel.SetText(msg)
+			utils.LimparCampos(entryNome, entryIdent, entrySalario, entryCpf, entrySexo, entryIdade, entryHorario)
 		}),
 		resultLabel,
 	)
@@ -89,6 +94,10 @@ func FuncionarioPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Buscar Funcionário por CPF"),
 		searchCpf,
 		widget.NewButton("Buscar", func() {
+			if utils.AtLeastOneEntryNil(searchCpf) {
+				resultLabel.SetText("Preencha o cpf a ser buscado!")
+				return
+			}
 			val := binding.NewString()
 			val.Set(searchCpf.Text)
 			f, msg := new(models.Funcionario).Pesquisar("cpf", val, false)
@@ -97,6 +106,7 @@ func FuncionarioPage(myApp fyne.App, mainPage fyne.Window) {
 			} else {
 				searchResult.SetText(msg)
 			}
+			utils.LimparCampos(entryNome, entryIdent, entrySalario, entryCpf, entrySexo, entryIdade, entryHorario)
 		}),
 		searchResult,
 	)
@@ -108,6 +118,10 @@ func FuncionarioPage(myApp fyne.App, mainPage fyne.Window) {
 		updateCpf,
 		entryNome, entryIdent, entrySalario, entrySexo, entryIdade, entryHorario,
 		widget.NewButton("Atualizar", func() {
+			if utils.AtLeastOneEntryNil(updateCpf) {
+				resultLabel.SetText("Preencha o cpf do funcionário a ser alterado")
+				return
+			}
 			msg := ""
 			if entryNome.Text != "" {
 				msg = new(models.Funcionario).Alterar("nome", entryNome.Text, "cpf", updateCpf.Text)
@@ -130,6 +144,7 @@ func FuncionarioPage(myApp fyne.App, mainPage fyne.Window) {
 				msg = new(models.Funcionario).Alterar("horario_trabalho", entryHorario.Text, "cpf", updateCpf.Text)
 			}
 			resultLabel.SetText(msg)
+			utils.LimparCampos(entryNome, entryIdent, entrySalario, entryCpf, entrySexo, entryIdade, entryHorario)
 		}),
 		resultLabel,
 	)
@@ -140,6 +155,10 @@ func FuncionarioPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Remover Funcionário"),
 		removeCpf,
 		widget.NewButton("Remover", func() {
+			if utils.AtLeastOneEntryNil(removeCpf) {
+				resultLabel.SetText("Preencha o cpf do funcionário a ser removido")
+				return
+			}
 			val := binding.NewString()
 			val.Set(removeCpf.Text)
 			f, _ := new(models.Funcionario).Pesquisar("cpf", val, false)
@@ -149,6 +168,7 @@ func FuncionarioPage(myApp fyne.App, mainPage fyne.Window) {
 			} else {
 				resultLabel.SetText("Funcionário não encontrado para remover.")
 			}
+			utils.LimparCampos(entryNome, entryIdent, entrySalario, entryCpf, entrySexo, entryIdade, entryHorario)
 		}),
 		resultLabel,
 	)

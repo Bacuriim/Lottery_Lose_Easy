@@ -29,7 +29,6 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 	entryClienteCpf := utils.CriarEntryNumeros("CPF do Cliente")
 	entryFuncionarioCpf := utils.CriarEntryNumeros("CPF do Funcionário")
 	entryServicoId := utils.CriarEntryNumeros("ID Serviço")
-	entryMeioPagamento := utils.CriarEntryLetrasNumeros("Meio de Pagamento")
 
 	meiosPagamento := []string{"dinheiro", "boleto", "cartão", "cheque", "PIX", "TED"}
 	selectMeioPagamento := widget.NewSelect(meiosPagamento, func(string) {})
@@ -41,6 +40,10 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Adicionar Atendimento"),
 		entryId, entryData, entryClienteCpf, entryFuncionarioCpf, entryServicoId, selectMeioPagamento,
 		widget.NewButton("Criar atendimento", func() {
+			if utils.AtLeastOneEntryNil(entryId, entryData, entryClienteCpf, entryFuncionarioCpf, entryServicoId) || utils.AtLeastOneSelectNil(selectMeioPagamento) {
+				resultLabel.SetText("Preencha todos os campos!")
+				return
+			}
 			id, _ := strconv.Atoi(entryId.Text)
 			servicoId, _ := strconv.Atoi(entryServicoId.Text)
 			clienteUUIDstr, err := utils.BuscarClienteUUIDPorCPF(entryClienteCpf.Text)
@@ -71,6 +74,8 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 			}
 			msg := atendimento.Salvar(atendimento)
 			resultLabel.SetText(msg)
+			utils.LimparCampos(entryId, entryData, entryClienteCpf, entryFuncionarioCpf, entryServicoId)
+			selectMeioPagamento.SetSelected("")
 		}),
 		resultLabel,
 	)
@@ -110,6 +115,10 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Buscar Atendimento por ID"),
 		searchId,
 		widget.NewButton("Buscar", func() {
+			if utils.AtLeastOneEntryNil(searchId) {
+				resultLabel.SetText("Preencha o id do atendimento a ser buscado")
+				return
+			}
 			val := binding.NewString()
 			val.Set(searchId.Text)
 			a, msg := new(models.Atendimento).Pesquisar("id", val, true)
@@ -118,6 +127,8 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 			} else {
 				searchResult.SetText(msg)
 			}
+			utils.LimparCampos(entryId, entryData, entryClienteCpf, entryFuncionarioCpf, entryServicoId)
+			selectMeioPagamento.SetSelected("")
 		}),
 		searchResult,
 	)
@@ -126,8 +137,12 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 
 	updateTab := container.NewVBox(
 		widget.NewLabel("Atualizar Atendimento"),
-		updateId, entryTransacao, entryData, entryClienteCpf, entryFuncionarioCpf, entryServicoId, entryMeioPagamento,
+		updateId, entryTransacao, entryData, entryClienteCpf, entryFuncionarioCpf, entryServicoId, selectMeioPagamento,
 		widget.NewButton("Atualizar", func() {
+			if utils.AtLeastOneEntryNil(updateId) {
+				resultLabel.SetText("Preencha o id do atendimento a ser alterado")
+				return
+			}
 			msg := ""
 			if entryTransacao.Text != "" {
 				msg = new(models.Atendimento).Alterar("numero_transacao", entryTransacao.Text, "id", updateId.Text)
@@ -158,10 +173,12 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 				servicoId, _ := strconv.Atoi(entryServicoId.Text)
 				msg = new(models.Atendimento).Alterar("servico_id", int32(servicoId), "id", updateId.Text)
 			}
-			if entryMeioPagamento.Text != "" {
-				msg = new(models.Atendimento).Alterar("meio_pagamento", entryMeioPagamento.Text, "id", updateId.Text)
+			if selectMeioPagamento.Selected != "" {
+				msg = new(models.Atendimento).Alterar("meio_pagamento", selectMeioPagamento.Selected, "id", updateId.Text)
 			}
 			resultLabel.SetText(msg)
+			utils.LimparCampos(entryId, entryData, entryClienteCpf, entryFuncionarioCpf, entryServicoId)
+			selectMeioPagamento.SetSelected("")
 		}),
 		resultLabel,
 	)
@@ -172,6 +189,10 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Remover Atendimento"),
 		removeId,
 		widget.NewButton("Remover", func() {
+			if utils.AtLeastOneEntryNil(removeId) {
+				resultLabel.SetText("Preencha o id do atendimento a ser removido")
+				return
+			}
 			val := binding.NewString()
 			val.Set(removeId.Text)
 			a, _ := new(models.Atendimento).Pesquisar("id", val, true)
@@ -181,6 +202,8 @@ func AtendimentoPage(myApp fyne.App, mainPage fyne.Window) {
 			} else {
 				resultLabel.SetText("Atendimento não encontrado para remover.")
 			}
+			utils.LimparCampos(entryId, entryData, entryClienteCpf, entryFuncionarioCpf, entryServicoId)
+			selectMeioPagamento.SetSelected("")
 		}),
 		resultLabel,
 	)

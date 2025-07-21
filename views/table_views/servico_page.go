@@ -37,6 +37,10 @@ func ServicoPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Adicionar Serviço"),
 		entryId, selectNome,
 		widget.NewButton("Criar serviço", func() {
+			if utils.AtLeastOneEntryNil(entryId) || utils.AtLeastOneSelectNil(selectNome) {
+				resultLabel.SetText("Preencha todos os campos!")
+				return
+			}
 			id, _ := strconv.Atoi(entryId.Text)
 			servico := models.Servico{
 				Id:          int32(id),
@@ -44,6 +48,8 @@ func ServicoPage(myApp fyne.App, mainPage fyne.Window) {
 			}
 			msg := servico.Salvar(servico)
 			resultLabel.SetText(msg)
+			utils.LimparCampos(entryId)
+			selectNome.SetSelected("")
 		}),
 		resultLabel,
 	)
@@ -80,6 +86,10 @@ func ServicoPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Buscar Serviço por ID"),
 		searchId,
 		widget.NewButton("Buscar", func() {
+			if utils.AtLeastOneEntryNil(searchId) {
+				resultLabel.SetText("Preencha o id do serviço a ser buscado")
+				return
+			}
 			val := binding.NewString()
 			val.Set(searchId.Text)
 			s, msg := new(models.Servico).Pesquisar("id", val, true)
@@ -88,6 +98,8 @@ func ServicoPage(myApp fyne.App, mainPage fyne.Window) {
 			} else {
 				searchResult.SetText(msg)
 			}
+			utils.LimparCampos(entryId)
+			selectNome.SetSelected("")
 		}),
 		searchResult,
 	)
@@ -105,11 +117,17 @@ func ServicoPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Atualizar Serviço"),
 		updateId, updateSelectNome,
 		widget.NewButton("Atualizar", func() {
+			if utils.AtLeastOneEntryNil(updateId) || utils.AtLeastOneSelectNil(updateSelectNome) {
+				resultLabel.SetText("Preencha todos os campos!")
+				return
+			}
 			msg := ""
 			if updateSelectNome.Selected != "" {
 				msg = new(models.Servico).Alterar("nome_servico", updateSelectNome.Selected, "id", updateId.Text)
 			}
 			resultLabel.SetText(msg)
+			utils.LimparCampos(entryId)
+			selectNome.SetSelected("")
 		}),
 		resultLabel,
 	)
@@ -120,6 +138,9 @@ func ServicoPage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Remover Serviço"),
 		removeId,
 		widget.NewButton("Remover", func() {
+			if utils.AtLeastOneEntryNil(removeId) {
+				resultLabel.SetText("Preencha o id do serviço a ser removido")
+			}
 			val := binding.NewString()
 			val.Set(removeId.Text)
 			s, _ := new(models.Servico).Pesquisar("id", val, true)
@@ -129,6 +150,8 @@ func ServicoPage(myApp fyne.App, mainPage fyne.Window) {
 			} else {
 				resultLabel.SetText("Serviço não encontrado para remover.")
 			}
+			utils.LimparCampos(entryId)
+			selectNome.SetSelected("")
 		}),
 		resultLabel,
 	)

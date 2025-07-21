@@ -47,8 +47,8 @@ CREATE TABLE Atendimento (
     servico_id SERIAL REFERENCES Servico(id),
     meio_pagamento VARCHAR(20),
     CHECK (meio_pagamento IS NULL OR meio_pagamento IN (
-       'dinheiro',
-       'boleto',
+        'dinheiro',
+        'boleto',
         'cartão',
         'cheque',
         'PIX',

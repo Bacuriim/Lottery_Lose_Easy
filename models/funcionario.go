@@ -43,7 +43,7 @@ func (*Funcionario) Remover(f Funcionario) string {
 	if exeError != nil {
 		return "Erro: " + exeError.Error()
 	}
-	return "Funcionário removido com sucesso!"
+	return "Funcionário removido!"
 }
 
 func (*Funcionario) Alterar(rowName string, rowValue interface{}, column string, condition interface{}) string {
@@ -53,7 +53,7 @@ func (*Funcionario) Alterar(rowName string, rowValue interface{}, column string,
 	if exeError != nil {
 		return "Erro: " + exeError.Error()
 	}
-	return "Funcionário alterado com sucesso!"
+	return "Funcionário alterado!"
 }
 
 func (*Funcionario) Pesquisar(searchParameter string, value String, isNumber bool) (*Funcionario, string) {

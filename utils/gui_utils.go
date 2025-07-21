@@ -18,10 +18,28 @@ func LimparCampos(entries ...*widget.Entry) {
 	}
 }
 
+func AtLeastOneEntryNil(entries ...*widget.Entry) bool {
+	for _, entry := range entries {
+		if entry.Text == "" {
+			return true
+		}
+	}
+	return false
+}
+
+func AtLeastOneSelectNil(selects ...*widget.Select) bool {
+	for _, entry := range selects {
+		if entry.Selected == "" {
+			return true
+		}
+	}
+	return false
+}
+
 func CriarEntryLetras(valor string) *widget.Entry {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Digite o " + valor + " aqui")
-	entry.Validator = validation.NewRegexp("^[a-zA-Z]*$", "Somente letras são permitidas")
+	entry.Validator = validation.NewRegexp("^[a-zA-Z ]*$", "Somente letras são permitidas")
 	return entry
 }
 

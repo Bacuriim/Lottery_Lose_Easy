@@ -37,7 +37,7 @@ func (*Cliente) Remover(c Cliente) string {
 	if exeError != nil {
 		return "Erro: " + exeError.Error()
 	}
-	return "Novo cliente salvo!"
+	return "Cliente removido!"
 }
 
 func (*Cliente) Alterar(rowName string, rowValue interface{}, column string, condition interface{}) string {
@@ -47,7 +47,7 @@ func (*Cliente) Alterar(rowName string, rowValue interface{}, column string, con
 	if exeError != nil {
 		return "Erro: " + exeError.Error()
 	}
-	return "Novo cliente salvo!"
+	return "Cliente alterado!"
 }
 
 func (*Cliente) Pesquisar(searchParameter string, value binding.String, isNumber bool) (*Cliente, string) {

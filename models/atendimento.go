@@ -1,9 +1,13 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
+	"fyne.io/fyne/v2/data/binding"
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"lottery-lose-easy/database"
+	"strings"
 	"time"
 )
 
@@ -11,8 +15,8 @@ type Atendimento struct {
 	Id              int32
 	NumeroTransacao string
 	DataHora        time.Time
-	ClienteId       string
-	FuncionarioId   string
+	ClienteId       uuid.UUID
+	FuncionarioId   uuid.UUID
 	ServicoId       int32
 	MeioPagamento   string
 }
@@ -51,9 +55,26 @@ func (*Atendimento) Alterar(rowName string, rowValue interface{}, column string,
 	return "Atendimento alterado com sucesso!"
 }
 
-func (*Atendimento) PesquisarPorId(id int32) (*Atendimento, string) {
+func (*Atendimento) Pesquisar(searchParameter string, value binding.String, isNumber bool) (*Atendimento, string) {
 	db, _ := database.GetDbSession()
-	row := db.QueryRow("SELECT id, numero_transacao, data_hora, cliente_id, funcionario_id, servico_id, meio_pagamento FROM Atendimento WHERE id = $1", id)
+	query := `
+		SELECT id, numero_transacao, data_hora, cliente_id, funcionario_id, servico_id, meio_pagamento
+		FROM Atendimento WHERE ` + searchParameter + ` = $1`
+
+	var row *sql.Row
+	valueString, _ := value.Get()
+
+	if isNumber {
+		if strings.Contains(valueString, ".") {
+			valueToFloat := binding.StringToFloat(value)
+			row = db.QueryRow(query, valueToFloat)
+		} else {
+			valueToInt := binding.StringToInt(value)
+			row = db.QueryRow(query, valueToInt)
+		}
+	} else {
+		row = db.QueryRow(query, valueString)
+	}
 
 	var a Atendimento
 	err := row.Scan(&a.Id, &a.NumeroTransacao, &a.DataHora, &a.ClienteId, &a.FuncionarioId, &a.ServicoId, &a.MeioPagamento)

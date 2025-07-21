@@ -9,8 +9,6 @@ func Init() {
 	myApp := main_view.Init()
 
 	main_view.MainPage()
+	table_views.ClientePage(myApp, main_view.GetMainScreen())
 	table_views.FuncionariosPage(myApp, main_view.GetMainScreen())
-	table_views.DepartamentosPage(myApp, main_view.GetMainScreen())
-	table_views.ChefeDepartamentoPage(myApp, main_view.GetMainScreen())
-	table_views.ProjetosPage(myApp, main_view.GetMainScreen())
 }

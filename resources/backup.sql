@@ -1,8 +1,12 @@
+DROP TABLE IF EXISTS Atendimento;
+DROP TABLE IF EXISTS Cliente;
+DROP TABLE IF EXISTS Funcionario;
+DROP TABLE IF EXISTS Servico;
+
 -- CLIENTE
 CREATE TABLE Cliente (
-   id uuid PRIMARY KEY,
+   id UUID PRIMARY KEY,
    nome VARCHAR(100) NOT NULL,
-   numero_identificacao VARCHAR(20) UNIQUE NOT NULL,
    cpf VARCHAR(14) UNIQUE NOT NULL,
    sexo CHAR(1),
    idade INT,
@@ -12,10 +16,10 @@ CREATE TABLE Cliente (
 
 -- FUNCIONÁRIO
 CREATE TABLE Funcionario (
-    id uuid PRIMARY KEY,
+    id UUID PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     numero_identificacao VARCHAR(20) UNIQUE NOT NULL,
-    salario DECIMAL NOT NULL,
+    salario FLOAT NOT NULL,
     cpf VARCHAR(14) UNIQUE NOT NULL,
     sexo CHAR(1),
     idade INT,
@@ -36,11 +40,11 @@ CREATE TABLE Servico (
 -- ATENDIMENTO
 CREATE TABLE Atendimento (
     id SERIAL PRIMARY KEY,
-    numero_transacao uuid,
+    numero_transacao UUID,
     data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    cliente_id INT REFERENCES Cliente(id),
-    funcionario_id INT REFERENCES Funcionario(id),
-    servico_id INT REFERENCES Servico(id),
+    cliente_id UUID REFERENCES Cliente(id),
+    funcionario_id UUID REFERENCES Funcionario(id),
+    servico_id SERIAL REFERENCES Servico(id),
     meio_pagamento VARCHAR(20),
     CHECK (meio_pagamento IS NULL OR meio_pagamento IN (
        'dinheiro',

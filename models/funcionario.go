@@ -3,17 +3,20 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"fyne.io/fyne/v2/data/binding"
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"github.com/shopspring/decimal"
 	"lottery-lose-easy/database"
-	"math"
+	"strings"
 )
 
+type String = binding.String
+type Float = binding.Float
 type Funcionario struct {
-	Id                  int
+	Id                  uuid.UUID
 	Nome                string
 	NumeroIdentificacao string
-	Salario             decimal.Decimal
+	Salario             float64
 	Cpf                 string
 	Sexo                string
 	Idade               int
@@ -25,7 +28,7 @@ func (*Funcionario) Salvar(f Funcionario) string {
 	_, exeError := db.Exec(`
 		INSERT INTO Funcionario (id, nome, numero_identificacao, salario, cpf, sexo, idade, horario_trabalho)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		f.Id, f.Nome, f.NumeroIdentificacao, f.Cpf, f.Sexo, f.Idade, f.HorarioTrabalho,
+		f.Id, f.Nome, f.NumeroIdentificacao, f.Salario, f.Cpf, f.Sexo, f.Idade, f.HorarioTrabalho,
 	)
 	if exeError != nil {
 		return "Erro: " + exeError.Error()
@@ -52,11 +55,25 @@ func (*Funcionario) Alterar(rowName string, rowValue interface{}, column string,
 	return "Funcionário alterado com sucesso!"
 }
 
-func (*Funcionario) PesquisarPorId(id string) (*Funcionario, string) {
+func (*Funcionario) Pesquisar(searchParameter string, value String, isNumber bool) (*Funcionario, string) {
 	db, _ := database.GetDbSession()
-	row := db.QueryRow(`
+	query := `
 		SELECT id, nome, numero_identificacao, cpf, sexo, idade, horario_trabalho
-		FROM Funcionario WHERE id = $1`, id)
+		FROM Funcionario WHERE ` + searchParameter + ` = $2`
+	var row *sql.Row
+	valueString, _ := value.Get()
+
+	if isNumber {
+		if strings.Contains(valueString, ".") {
+			valueToFloat := binding.StringToFloat(value)
+			row = db.QueryRow(query, searchParameter, valueToFloat)
+		} else {
+			valueToInt := binding.StringToInt(value)
+			row = db.QueryRow(query, searchParameter, valueToInt)
+		}
+	} else {
+		row = db.QueryRow(query, searchParameter, value)
+	}
 
 	var f Funcionario
 	err := row.Scan(&f.Id, &f.Nome, &f.NumeroIdentificacao, &f.Cpf, &f.Sexo, &f.Idade, &f.HorarioTrabalho)

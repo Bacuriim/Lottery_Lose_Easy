@@ -1,13 +1,18 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
+	"fyne.io/fyne/v2/data/binding"
+	"github.com/google/uuid"
+	_ "github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"lottery-lose-easy/database"
+	"strings"
 )
 
 type Cliente struct {
-	Id       int
+	Id       uuid.UUID
 	Nome     string
 	Cpf      string
 	Sexo     string
@@ -44,13 +49,31 @@ func (*Cliente) Alterar(rowName string, rowValue interface{}, column string, con
 	return "Novo cliente salvo!"
 }
 
-func (*Cliente) PesquisarPorId(id string) (*Cliente, string) {
+func (*Cliente) Pesquisar(searchParameter string, value binding.String, isNumber bool) (*Cliente, string) {
 	db, _ := database.GetDbSession()
-	result := db.QueryRow("SELECT id, nome, cpf, sexo, idade, endereco, conta FROM Cliente WHERE id = $1", id)
+	query := `
+		SELECT id, nome, cpf, sexo, idade, endereco, conta
+		FROM Cliente WHERE ` + searchParameter + ` = $1`
+
+	var row *sql.Row
+	valueString, _ := value.Get()
+
+	if isNumber {
+		if strings.Contains(valueString, ".") {
+			valueToFloat := binding.StringToFloat(value)
+			row = db.QueryRow(query, valueToFloat)
+		} else {
+			valueToInt := binding.StringToInt(value)
+			row = db.QueryRow(query, valueToInt)
+		}
+	} else {
+		row = db.QueryRow(query, valueString)
+	}
+
 	var c Cliente
-	exeError := result.Scan(&c.Id, &c.Nome, &c.Cpf, &c.Sexo, &c.Idade, &c.Endereco, &c.Conta)
-	if exeError != nil {
-		return nil, "Erro: " + exeError.Error()
+	err := row.Scan(&c.Id, &c.Nome, &c.Cpf, &c.Sexo, &c.Idade, &c.Endereco, &c.Conta)
+	if err != nil {
+		return nil, "Erro: " + err.Error()
 	}
 	return &c, "Cliente encontrado!"
 }

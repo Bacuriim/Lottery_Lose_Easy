@@ -10,5 +10,7 @@ func Init() {
 
 	main_view.MainPage()
 	table_views.ClientePage(myApp, main_view.GetMainScreen())
-	table_views.FuncionariosPage(myApp, main_view.GetMainScreen())
+	table_views.FuncionarioPage(myApp, main_view.GetMainScreen())
+	table_views.ServicoPage(myApp, main_view.GetMainScreen())
+	table_views.AtendimentoPage(myApp, main_view.GetMainScreen())
 }

@@ -2,17 +2,22 @@ package table_views
 
 import (
 	"fmt"
+	"lottery-lose-easy/models"
+	"lottery-lose-easy/utils"
+	"strconv"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
-	"lottery-lose-easy/utils"
+	"github.com/google/uuid"
 )
 
 func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 	clientMainPage := myApp.NewWindow("Clientes")
 	clientMainPage.Resize(fyne.NewSize(800, 600))
 
-	icon, err := fyne.LoadResourceFromPath("assets/imgs/CRUD_IMAGE.png")
+	icon, err := fyne.LoadResourceFromPath("assets/imgs/LotericaPercaFacil.png")
 	if err != nil {
 		fmt.Println("Erro ao carregar o ícone:", err)
 	} else {
@@ -26,13 +31,26 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 	entryAddress := utils.CriarEntryLetrasNumeros("Endereço")
 	entryAccount := utils.CriarEntryNumeros("Conta")
 
+	resultLabel := widget.NewLabel("")
+
 	addTab := container.NewVBox(
 		widget.NewLabel("Adicionar Cliente"),
 		entryName, entryCpf, entryGender, entryAge, entryAddress, entryAccount,
 		widget.NewButton("Criar cliente", func() {
-			// TODO: Salvar cliente no banco
-			fmt.Println("Cliente criado (simulação).")
+			idade, _ := strconv.Atoi(entryAge.Text)
+			cliente := models.Cliente{
+				Id:       uuid.New(),
+				Nome:     entryName.Text,
+				Cpf:      entryCpf.Text,
+				Sexo:     entryGender.Text,
+				Idade:    idade,
+				Endereco: entryAddress.Text,
+				Conta:    entryAccount.Text,
+			}
+			msg := cliente.Salvar(cliente)
+			resultLabel.SetText(msg)
 		}),
+		resultLabel,
 	)
 
 	clientList := container.NewVBox()
@@ -40,47 +58,94 @@ func ClientePage(myApp fyne.App, mainPage fyne.Window) {
 		widget.NewLabel("Clientes cadastrados:"),
 		clientList,
 		widget.NewButton("Listar Clientes", func() {
-			clientList.Objects = nil // limpa a lista
-			// TODO: Buscar clientes do banco e preencher
-			clientList.Add(widget.NewLabel("-> Cliente Exemplo"))
+			clientList.Objects = nil
+			clientes, msg := new(models.Cliente).BuscarTodos()
+			if msg != "Clientes encontrados!" {
+				resultLabel.SetText(msg)
+			} else {
+				for _, c := range clientes {
+					card := widget.NewCard(
+						c.Nome,
+						fmt.Sprintf("CPF: %s", c.Cpf),
+						widget.NewLabel(fmt.Sprintf(
+							"Sexo: %s\nIdade: %d\nEndereço: %s\nConta: %s",
+							c.Sexo, c.Idade, c.Endereco, c.Conta,
+						)),
+					)
+					clientList.Add(card)
+				}
+				resultLabel.SetText("Clientes listados com sucesso!")
+			}
 			clientList.Refresh()
 		}),
+		resultLabel,
 	)
 
 	searchResult := widget.NewLabel("Resultado: nenhum")
-	searchCpf := utils.CriarEntryNumeros("CPF para buscar")
+	searchCpf := utils.CriarEntryNumeros("CPF")
 
 	searchTab := container.NewVBox(
 		widget.NewLabel("Buscar Cliente por CPF"),
 		searchCpf,
 		widget.NewButton("Buscar", func() {
-			// TODO: Buscar cliente no banco
-			searchResult.SetText("Cliente encontrado (simulação)")
+			val := binding.NewString()
+			val.Set(searchCpf.Text)
+			c, msg := new(models.Cliente).Pesquisar("cpf", val, false)
+			if c != nil {
+				searchResult.SetText(fmt.Sprintf("Encontrado: %s, CPF: %s", c.Nome, c.Cpf))
+			} else {
+				searchResult.SetText(msg)
+			}
 		}),
 		searchResult,
 	)
 
-	updateCpf := utils.CriarEntryNumeros("CPF para atualizar")
+	updateCpf := utils.CriarEntryNumeros("CPF")
 
 	updateTab := container.NewVBox(
 		widget.NewLabel("Atualizar Cliente"),
 		updateCpf,
 		entryName, entryGender, entryAge, entryAddress, entryAccount,
 		widget.NewButton("Atualizar", func() {
-			// TODO: Atualizar cliente no banco
-			fmt.Println("Cliente atualizado (simulação).")
+			msg := ""
+			if entryName.Text != "" {
+				msg = new(models.Cliente).Alterar("nome", entryName.Text, "cpf", updateCpf.Text)
+			}
+			if entryGender.Text != "" {
+				msg = new(models.Cliente).Alterar("sexo", entryGender.Text, "cpf", updateCpf.Text)
+			}
+			if entryAge.Text != "" {
+				idade, _ := strconv.Atoi(entryAge.Text)
+				msg = new(models.Cliente).Alterar("idade", idade, "cpf", updateCpf.Text)
+			}
+			if entryAddress.Text != "" {
+				msg = new(models.Cliente).Alterar("endereco", entryAddress.Text, "cpf", updateCpf.Text)
+			}
+			if entryAccount.Text != "" {
+				msg = new(models.Cliente).Alterar("conta", entryAccount.Text, "cpf", updateCpf.Text)
+			}
+			resultLabel.SetText(msg)
 		}),
+		resultLabel,
 	)
 
-	removeCpf := utils.CriarEntryNumeros("CPF para remover")
+	removeCpf := utils.CriarEntryNumeros("CPF")
 
 	removeTab := container.NewVBox(
 		widget.NewLabel("Remover Cliente"),
 		removeCpf,
 		widget.NewButton("Remover", func() {
-			// TODO: Remover cliente do banco
-			fmt.Println("Cliente removido (simulação).")
+			val := binding.NewString()
+			val.Set(removeCpf.Text)
+			c, _ := new(models.Cliente).Pesquisar("cpf", val, false)
+			if c != nil {
+				msg := new(models.Cliente).Remover(*c)
+				resultLabel.SetText(msg)
+			} else {
+				resultLabel.SetText("Cliente não encontrado para remover.")
+			}
 		}),
+		resultLabel,
 	)
 
 	tabs := container.NewAppTabs(

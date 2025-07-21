@@ -3,10 +3,11 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"lottery-lose-easy/database"
+	"strconv"
+
 	"fyne.io/fyne/v2/data/binding"
 	_ "github.com/lib/pq"
-	"lottery-lose-easy/database"
-	"strings"
 )
 
 type Servico struct {
@@ -48,22 +49,20 @@ func (*Servico) Alterar(rowName string, rowValue interface{}, column string, con
 
 func (*Servico) Pesquisar(searchParameter string, value binding.String, isNumber bool) (*Servico, string) {
 	db, _ := database.GetDbSession()
-	query := `
-		SELECT id, nome_servico
-		FROM Servico WHERE ` + searchParameter + ` = $1`
+	query := `SELECT id, nome_servico FROM Servico WHERE ` + searchParameter + ` = $1`
 
 	var row *sql.Row
 	valueString, _ := value.Get()
 
-	if isNumber {
-		if strings.Contains(valueString, ".") {
-			valueToFloat := binding.StringToFloat(value)
-			row = db.QueryRow(query, valueToFloat)
-		} else {
-			valueToInt := binding.StringToInt(value)
-			row = db.QueryRow(query, valueToInt)
+	switch {
+	case isNumber:
+		// Sempre converte para inteiro, pois id é SERIAL
+		valueToInt, err := strconv.Atoi(valueString)
+		if err != nil {
+			return nil, "Erro ao converter valor para inteiro: " + err.Error()
 		}
-	} else {
+		row = db.QueryRow(query, valueToInt)
+	default:
 		row = db.QueryRow(query, valueString)
 	}
 
@@ -73,4 +72,30 @@ func (*Servico) Pesquisar(searchParameter string, value binding.String, isNumber
 		return nil, "Erro: " + err.Error()
 	}
 	return &s, "Serviço encontrado!"
+}
+
+func (*Servico) BuscarTodos() ([]*Servico, string) {
+	db, _ := database.GetDbSession()
+	query := `
+		SELECT id, nome_servico
+		FROM Servico`
+
+	var rows *sql.Rows
+	var err error
+	rows, err = db.Query(query)
+	if err != nil {
+		return nil, "Erro: " + err.Error()
+	}
+	defer rows.Close()
+
+	var servicos []*Servico
+	for rows.Next() {
+		var s Servico
+		err := rows.Scan(&s.Id, &s.NomeServico)
+		if err != nil {
+			return nil, "Erro: " + err.Error()
+		}
+		servicos = append(servicos, &s)
+	}
+	return servicos, "Serviços encontrados!"
 }

@@ -3,12 +3,13 @@ package models
 import (
 	"database/sql"
 	"fmt"
-	"fyne.io/fyne/v2/data/binding"
-	"github.com/google/uuid"
-	_ "github.com/lib/pq"
 	"lottery-lose-easy/database"
 	"strings"
 	"time"
+
+	"fyne.io/fyne/v2/data/binding"
+	"github.com/google/uuid"
+	_ "github.com/lib/pq"
 )
 
 type Atendimento struct {
@@ -82,4 +83,29 @@ func (*Atendimento) Pesquisar(searchParameter string, value binding.String, isNu
 		return nil, "Erro: " + err.Error()
 	}
 	return &a, "Atendimento encontrado!"
+}
+
+func (*Atendimento) BuscarTodos() ([]*Atendimento, string) {
+	db, _ := database.GetDbSession()
+	query := `
+		SELECT id, numero_transacao, data_hora, cliente_id, funcionario_id, servico_id, meio_pagamento
+		FROM Atendimento`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, "Erro: " + err.Error()
+	}
+	defer rows.Close()
+
+	var atendimentos []*Atendimento
+	for rows.Next() {
+		var a Atendimento
+		err := rows.Scan(&a.Id, &a.NumeroTransacao, &a.DataHora, &a.ClienteId, &a.FuncionarioId, &a.ServicoId, &a.MeioPagamento)
+		if err != nil {
+			return nil, "Erro: " + err.Error()
+		}
+		atendimentos = append(atendimentos, &a)
+	}
+
+	return atendimentos, "Atendimentos encontrados!"
 }

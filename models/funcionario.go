@@ -3,11 +3,12 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"lottery-lose-easy/database"
+	"strings"
+
 	"fyne.io/fyne/v2/data/binding"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"lottery-lose-easy/database"
-	"strings"
 )
 
 type String = binding.String
@@ -27,7 +28,7 @@ func (*Funcionario) Salvar(f Funcionario) string {
 	db, _ := database.GetDbSession()
 	_, exeError := db.Exec(`
 		INSERT INTO Funcionario (id, nome, numero_identificacao, salario, cpf, sexo, idade, horario_trabalho)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		f.Id, f.Nome, f.NumeroIdentificacao, f.Salario, f.Cpf, f.Sexo, f.Idade, f.HorarioTrabalho,
 	)
 	if exeError != nil {
@@ -58,27 +59,52 @@ func (*Funcionario) Alterar(rowName string, rowValue interface{}, column string,
 func (*Funcionario) Pesquisar(searchParameter string, value String, isNumber bool) (*Funcionario, string) {
 	db, _ := database.GetDbSession()
 	query := `
-		SELECT id, nome, numero_identificacao, cpf, sexo, idade, horario_trabalho
-		FROM Funcionario WHERE ` + searchParameter + ` = $2`
+		SELECT id, nome, numero_identificacao, salario, cpf, sexo, idade, horario_trabalho
+		FROM Funcionario WHERE ` + searchParameter + ` = $1`
 	var row *sql.Row
 	valueString, _ := value.Get()
 
 	if isNumber {
 		if strings.Contains(valueString, ".") {
 			valueToFloat := binding.StringToFloat(value)
-			row = db.QueryRow(query, searchParameter, valueToFloat)
+			row = db.QueryRow(query, valueToFloat)
 		} else {
 			valueToInt := binding.StringToInt(value)
-			row = db.QueryRow(query, searchParameter, valueToInt)
+			row = db.QueryRow(query, valueToInt)
 		}
 	} else {
-		row = db.QueryRow(query, searchParameter, value)
+		row = db.QueryRow(query, valueString)
 	}
 
 	var f Funcionario
-	err := row.Scan(&f.Id, &f.Nome, &f.NumeroIdentificacao, &f.Cpf, &f.Sexo, &f.Idade, &f.HorarioTrabalho)
+	err := row.Scan(&f.Id, &f.Nome, &f.NumeroIdentificacao, &f.Salario, &f.Cpf, &f.Sexo, &f.Idade, &f.HorarioTrabalho)
 	if err != nil {
 		return nil, "Erro: " + err.Error()
 	}
 	return &f, "Funcionário encontrado!"
+}
+
+func (*Funcionario) BuscarTodos() ([]*Funcionario, string) {
+	db, _ := database.GetDbSession()
+	query := `
+		SELECT id, nome, numero_identificacao, salario, cpf, sexo, idade, horario_trabalho
+		FROM Funcionario`
+	var rows *sql.Rows
+	var err error
+	rows, err = db.Query(query)
+	if err != nil {
+		return nil, "Erro: " + err.Error()
+	}
+	defer rows.Close()
+
+	var funcionarios []*Funcionario
+	for rows.Next() {
+		var f Funcionario
+		err := rows.Scan(&f.Id, &f.Nome, &f.NumeroIdentificacao, &f.Salario, &f.Cpf, &f.Sexo, &f.Idade, &f.HorarioTrabalho)
+		if err != nil {
+			return nil, "Erro: " + err.Error()
+		}
+		funcionarios = append(funcionarios, &f)
+	}
+	return funcionarios, "Funcionários encontrados!"
 }

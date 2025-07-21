@@ -1,6 +1,12 @@
 package utils
 
 import (
+	"fmt"
+	"strings"
+
+	"lottery-lose-easy/models"
+
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/widget"
 )
@@ -22,9 +28,9 @@ func CriarEntryLetras(valor string) *widget.Entry {
 func CriarEntryNumeros(valor string) *widget.Entry {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Digite o " + valor + " aqui")
-	if valor == "CPF" {
+	if strings.Contains(valor, "CPF") {
 		entry.Validator = validation.NewRegexp("^[0-9]{3}.[0-9]{3}.[0-9]{3}-[0-9]{2}$", "Somente números são permitidos e deve ter 11 dígitos")
-	} else if valor == "CEP" {
+	} else if strings.Contains(valor, "CEP") {
 		entry.Validator = validation.NewRegexp("^[0-9]{5}-[0-9]{3}$", "Somente números são permitidos e deve ter 8 dígitos")
 	} else {
 		entry.Validator = validation.NewRegexp("^[0-9]*$", "Somente números são permitidos")
@@ -35,7 +41,11 @@ func CriarEntryNumeros(valor string) *widget.Entry {
 func CriarEntryLetrasNumeros(valor string) *widget.Entry {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Digite o " + valor + " aqui")
-	entry.Validator = validation.NewRegexp("^[a-zA-Z0-9]*$", "Somente letras e números são permitidos")
+	if strings.Contains(valor, "Data/Hora") {
+		entry.Validator = validation.NewRegexp("^[a-zA-Z0-9: \\-]*$", "Somente letras, números, espaços, hífen e dois pontos são permitidos")
+	} else {
+		entry.Validator = validation.NewRegexp("^[a-zA-Z0-9 ]*$", "Somente letras, números e espaços são permitidos")
+	}
 	return entry
 }
 
@@ -65,4 +75,26 @@ func FormatarCEP(cep string) string {
 		return cep
 	}
 	return cep[0:5] + "-" + cep[5:8]
+}
+
+// Busca o UUID do cliente pelo CPF informado
+func BuscarClienteUUIDPorCPF(cpf string) (string, error) {
+	val := binding.NewString()
+	val.Set(cpf)
+	cliente, msg := new(models.Cliente).Pesquisar("cpf", val, false)
+	if cliente != nil {
+		return cliente.Id.String(), nil
+	}
+	return "", fmt.Errorf(msg)
+}
+
+// Busca o UUID do funcionário pelo CPF informado
+func BuscarFuncionarioUUIDPorCPF(cpf string) (string, error) {
+	val := binding.NewString()
+	val.Set(cpf)
+	funcionario, msg := new(models.Funcionario).Pesquisar("cpf", val, false)
+	if funcionario != nil {
+		return funcionario.Id.String(), nil
+	}
+	return "", fmt.Errorf(msg)
 }

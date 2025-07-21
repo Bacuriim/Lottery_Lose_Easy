@@ -2,12 +2,13 @@ package main_view
 
 import (
 	"fmt"
+	"lottery-lose-easy/database"
+	"lottery-lose-easy/views/table_views"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"lottery-lose-easy/database"
-	"lottery-lose-easy/views/table_views"
 )
 
 var myApp fyne.App
@@ -37,7 +38,7 @@ func MainPage() {
 	mainPage = GetMainScreen()
 
 	// Define o ícone da janela
-	icon, err := fyne.LoadResourceFromPath("assets/imgs/CRUD_IMAGE.png") // Load the icon from a file
+	icon, err := fyne.LoadResourceFromPath("assets/imgs/LotericaPercaFacil.png")
 	if err != nil {
 		fmt.Println("Erro ao carregar o ícone:", err)
 	} else {
@@ -55,11 +56,21 @@ func MainPage() {
 
 	btFuncionarios := widget.NewButton("Funcionários", func() {
 		mainPage.Hide()
-		table_views.FuncionariosPage(myApp, mainPage)
+		table_views.FuncionarioPage(myApp, mainPage)
+	})
+
+	btServicos := widget.NewButton("Serviços", func() {
+		mainPage.Hide()
+		table_views.ServicoPage(myApp, mainPage)
+	})
+
+	btAtendimentos := widget.NewButton("Atendimentos", func() {
+		mainPage.Hide()
+		table_views.AtendimentoPage(myApp, mainPage)
 	})
 
 	// Layout da barra superior
-	barraSuperior := container.NewHBox(btClients, btFuncionarios)
+	barraSuperior := container.NewHBox(btClients, btFuncionarios, btServicos, btAtendimentos)
 
 	// Layout principal
 	mainPage.SetContent(

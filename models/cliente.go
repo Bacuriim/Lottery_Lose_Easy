@@ -3,12 +3,13 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"lottery-lose-easy/database"
+	"strings"
+
 	"fyne.io/fyne/v2/data/binding"
 	"github.com/google/uuid"
 	_ "github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"lottery-lose-easy/database"
-	"strings"
 )
 
 type Cliente struct {
@@ -76,4 +77,30 @@ func (*Cliente) Pesquisar(searchParameter string, value binding.String, isNumber
 		return nil, "Erro: " + err.Error()
 	}
 	return &c, "Cliente encontrado!"
+}
+
+func (*Cliente) BuscarTodos() ([]*Cliente, string) {
+	db, _ := database.GetDbSession()
+	query := `
+		SELECT id, nome, cpf, sexo, idade, endereco, conta
+		FROM Cliente`
+
+	var rows *sql.Rows
+	var err error
+	rows, err = db.Query(query)
+	if err != nil {
+		return nil, "Erro: " + err.Error()
+	}
+	defer rows.Close()
+
+	var clientes []*Cliente
+	for rows.Next() {
+		var c Cliente
+		err := rows.Scan(&c.Id, &c.Nome, &c.Cpf, &c.Sexo, &c.Idade, &c.Endereco, &c.Conta)
+		if err != nil {
+			return nil, "Erro: " + err.Error()
+		}
+		clientes = append(clientes, &c)
+	}
+	return clientes, "Clientes encontrados!"
 }

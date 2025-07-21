@@ -13,4 +13,5 @@ func Init() {
 	table_views.FuncionarioPage(myApp, main_view.GetMainScreen())
 	table_views.ServicoPage(myApp, main_view.GetMainScreen())
 	table_views.AtendimentoPage(myApp, main_view.GetMainScreen())
+	table_views.RelatoriosPage(myApp, main_view.GetMainScreen())
 }

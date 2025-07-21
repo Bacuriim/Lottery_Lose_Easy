@@ -85,8 +85,14 @@ func MainPage() {
 	})
 	btAtendimentos.Resize(fyne.NewSize(400, 100))
 
+	btRelatorios := widget.NewButton("Relatorios", func() {
+		mainPage.Hide()
+		table_views.RelatoriosPage(myApp, mainPage)
+	})
+	btRelatorios.Resize(fyne.NewSize(400, 100))
+
 	// Layout da barra superior
-	barraSuperior := container.NewVBox(txLottery, txParticipants, btClients, btFuncionarios, btServicos, btAtendimentos)
+	barraSuperior := container.NewVBox(txLottery, txParticipants, btClients, btFuncionarios, btServicos, btAtendimentos, btRelatorios)
 
 	// Layout principal
 	mainPage.SetContent(
